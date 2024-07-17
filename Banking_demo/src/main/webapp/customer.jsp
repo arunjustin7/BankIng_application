@@ -5,6 +5,8 @@
 <html lang="en">
 
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banking Dashboard</title>
@@ -210,9 +212,11 @@ try{
 
      ps.setLong(1, (Long)s.getAttribute("customer"));
      ps.setString(2,(String) s.getAttribute("cus_password"));
+
      ResultSet val=ps.executeQuery();
      int i=0;
      if( val.next()){
+         s.setAttribute("user_name", val.getString(3));
     	 s.setAttribute("cus_data", val);
          s.setAttribute("cus_bal", val.getLong(8));
          i=i+1;
@@ -249,7 +253,7 @@ try{
         <button  class="button" type="submit" >Logout</button>
 </Form>
             
-            <button class="button" onclick="printTransactions()">Print Transactions</button>
+            <button class="button" onclick="generatePDF()">Print Transactions</button>
             
             
             <div class="dialog-overlay" id="dialogOverlay">
@@ -299,7 +303,7 @@ try{
                 
                 try {
                 	 Connection con=Dbconnection.connect_data();
-                	 PreparedStatement ps=con.prepareStatement("select * from transaction where acc_no=? ");
+                	 PreparedStatement ps=con.prepareStatement("select * from transaction where acc_no=? ORDER BY dob DESC LIMIT 10");
 
                 	    HttpSession s=request.getSession();
 
@@ -365,7 +369,49 @@ try{
         submitButton2.addEventListener('click', function() {
             dialogOverlay2.style.display = 'none';
         });
+        function generatePDF() {
+            var { jsPDF } = window.jspdf;
+            var doc = new jsPDF();
 
+            var userName = "<%= session.getAttribute("user_name") %>";
+            var columns = ["Account_Number",  "Transaction Type", "Transaction Amount","Status", "Transaction Date"];
+            var rows = [];
+
+            <% 
+            
+                try {
+                	Connection con=Dbconnection.connect_data();
+                	
+                	PreparedStatement ps=con.prepareStatement("select * from transaction where acc_no=? ORDER BY dob DESC LIMIT 10");
+
+             	    HttpSession s=request.getSession();
+
+             	    ps.setLong(1, (Long) s.getAttribute("customer"));
+                    ResultSet rs = ps.executeQuery();
+                    
+                    while (rs.next()) {
+            %>
+            rows.push(["<%= rs.getLong(1) %>", "<%= rs.getString(2) %>", "<%= rs.getLong(3) %>" ,"<%= rs.getString(4) %>", "<%= rs.getDate(5)  %>"]);
+            <% 
+                    }
+                    
+                    rs.close();
+                    ps.close();
+                    con.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            %>
+
+            doc.text("Account Holder: " + userName, 14, 16);
+            doc.autoTable({
+                head: [columns],
+                body: rows,
+                startY: 20,
+            });
+
+            doc.save(userName +"_Transaction_History.pdf");
+        }
        
     </script>
 
