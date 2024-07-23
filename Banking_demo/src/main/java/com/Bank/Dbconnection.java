@@ -10,10 +10,10 @@ public class Dbconnection {
 
 	      String JdbcURL = "jdbc:mysql://localhost:3306/Banking";
 	      String Username = "root";
-	      String password = "12345";
+	      String password = "9962725943@123";
 	      Connection con = null;
 	      try {
-	    	 Class.forName("com.mysql.jdbc.Driver");
+	    	 Class.forName("com.mysql.cj.jdbc.Driver");
 	    
 	         con=DriverManager.getConnection(JdbcURL, Username, password);
 	        

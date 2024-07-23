@@ -242,7 +242,7 @@ try{
            
         </div>
         <div class="dashboard">
-            <div class="balance">Balance: Rs <span id="balance">${sessionScope.cus_data.getInt(8)}</span></div>
+            <div class="balance">Balance: Rs <span id="balance">${sessionScope.cus_data.getLong(8)}</span></div>
             <button class="button" id="openDialog">Deposit</button>
             <button class="button" id="openDialog1">Withdraw</button>
             <button class="button" id="openDialog2">Change password</button>
